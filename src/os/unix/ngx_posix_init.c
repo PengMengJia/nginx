@@ -66,15 +66,15 @@ ngx_os_init(ngx_log_t *log)
     }
 
 #if (NGX_HAVE_LEVEL1_DCACHE_LINESIZE)
-    size = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);
+    size = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);  // 获取cpu缓存大小，后续将对齐策略改为此值的整数倍，有利于减少cpu内存读取操作
     if (size > 0) {
         ngx_cacheline_size = size;
     }
 #endif
 
-    ngx_cpuinfo();
+    ngx_cpuinfo(); // 根据cpu信息设置 ngx_cacheline_size 的值
 
-    if (getrlimit(RLIMIT_NOFILE, &rlmt) == -1) {
+    if (getrlimit(RLIMIT_NOFILE, &rlmt) == -1) {  // 获取当前系统文件描述符的配置信息
         ngx_log_error(NGX_LOG_ALERT, log, errno,
                       "getrlimit(RLIMIT_NOFILE) failed");
         return NGX_ERROR;
@@ -89,7 +89,7 @@ ngx_os_init(ngx_log_t *log)
 #endif
 
     tp = ngx_timeofday();
-    srandom(((unsigned) ngx_pid << 16) ^ tp->sec ^ tp->msec);
+    srandom(((unsigned) ngx_pid << 16) ^ tp->sec ^ tp->msec); // 设置随机数种子
 
     return NGX_OK;
 }

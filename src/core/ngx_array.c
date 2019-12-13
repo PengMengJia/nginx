@@ -51,16 +51,16 @@ ngx_array_push(ngx_array_t *a)
     size_t       size;
     ngx_pool_t  *p;
 
-    if (a->nelts == a->nalloc) {
+    if (a->nelts == a->nalloc) {  // 当前数组已经存满了
 
         /* the array is full */
 
-        size = a->size * a->nalloc;
+        size = a->size * a->nalloc;  // 当前数组大小
 
-        p = a->pool;
+        p = a->pool;  // 内存池
 
         if ((u_char *) a->elts + size == p->d.last
-            && p->d.last + a->size <= p->d.end)
+            && p->d.last + a->size <= p->d.end)  // 当前数组是在内存池最近一个申请的内存，则直接往内存池后扩1个数组位
         {
             /*
              * the array allocation is the last in the pool
@@ -73,19 +73,19 @@ ngx_array_push(ngx_array_t *a)
         } else {
             /* allocate a new array */
 
-            new = ngx_palloc(p, 2 * size);
+            new = ngx_palloc(p, 2 * size);  // 从新申请2倍的数组大小
             if (new == NULL) {
                 return NULL;
             }
 
-            ngx_memcpy(new, a->elts, size);
+            ngx_memcpy(new, a->elts, size); // 原数组拷贝到新的位置  ? 原来池子的内存怎么归还，释放？
             a->elts = new;
             a->nalloc *= 2;
         }
     }
 
-    elt = (u_char *) a->elts + a->size * a->nelts;
-    a->nelts++;
+    elt = (u_char *) a->elts + a->size * a->nelts; // 找到后面的元素下标
+    a->nelts++;  // 已使用个数+1
 
     return elt;
 }

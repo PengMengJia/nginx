@@ -14,11 +14,11 @@
 
 
 typedef struct {
-    void        *elts;
-    ngx_uint_t   nelts;
-    size_t       size;
-    ngx_uint_t   nalloc;
-    ngx_pool_t  *pool;
+    void        *elts;   // 数组可用的下标
+    ngx_uint_t   nelts;  // 已有元素个数
+    size_t       size;   // 数组单个元素大小
+    ngx_uint_t   nalloc;  // 数组元素个数
+    ngx_pool_t  *pool;   // 当前内存是在哪个池子存的
 } ngx_array_t;
 
 
@@ -41,7 +41,7 @@ ngx_array_init(ngx_array_t *array, ngx_pool_t *pool, ngx_uint_t n, size_t size)
     array->nalloc = n;
     array->pool = pool;
 
-    array->elts = ngx_palloc(pool, n * size);
+    array->elts = ngx_palloc(pool, n * size); // 从内存池申请n * size 大小的内存，也就是数组长度为n，内容大小为size
     if (array->elts == NULL) {
         return NGX_ERROR;
     }

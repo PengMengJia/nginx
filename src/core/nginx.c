@@ -201,13 +201,13 @@ main(int argc, char *const *argv)
     ngx_conf_dump_t  *cd;
     ngx_core_conf_t  *ccf;
 
-    ngx_debug_init();
+    ngx_debug_init();  // 调试开关置 1
 
-    if (ngx_strerror_init() != NGX_OK) {
+    if (ngx_strerror_init() != NGX_OK) {  // 将系统errno及对应的errmsg存储下来
         return 1;
     }
 
-    if (ngx_get_options(argc, argv) != NGX_OK) {
+    if (ngx_get_options(argc, argv) != NGX_OK) {  // 解析入参
         return 1;
     }
 
@@ -221,7 +221,7 @@ main(int argc, char *const *argv)
 
     /* TODO */ ngx_max_sockets = -1;
 
-    ngx_time_init();
+    ngx_time_init();  // 更新当前时间到缓存
 
 #if (NGX_PCRE)
     ngx_regex_init();
@@ -230,14 +230,14 @@ main(int argc, char *const *argv)
     ngx_pid = ngx_getpid();
     ngx_parent = ngx_getppid();
 
-    log = ngx_log_init(ngx_prefix);
+    log = ngx_log_init(ngx_prefix);  // 初始化日志文件，open 文件，
     if (log == NULL) {
         return 1;
     }
 
     /* STUB */
 #if (NGX_OPENSSL)
-    ngx_ssl_init(log);
+    ngx_ssl_init(log); // 初始化openssl环境
 #endif
 
     /*
@@ -246,23 +246,23 @@ main(int argc, char *const *argv)
      */
 
     ngx_memzero(&init_cycle, sizeof(ngx_cycle_t));
-    init_cycle.log = log;
+    init_cycle.log = log;        // 保存log信息到cycle，方便后续打印
     ngx_cycle = &init_cycle;
 
-    init_cycle.pool = ngx_create_pool(1024, log);
+    init_cycle.pool = ngx_create_pool(1024, log);  // 申请内存池，并将地址信息保存
     if (init_cycle.pool == NULL) {
         return 1;
     }
 
-    if (ngx_save_argv(&init_cycle, argc, argv) != NGX_OK) {
+    if (ngx_save_argv(&init_cycle, argc, argv) != NGX_OK) {  // 保存入参信息
         return 1;
     }
 
-    if (ngx_process_options(&init_cycle) != NGX_OK) {
+    if (ngx_process_options(&init_cycle) != NGX_OK) { // 设置输入参数
         return 1;
     }
 
-    if (ngx_os_init(log) != NGX_OK) {
+    if (ngx_os_init(log) != NGX_OK) {  // 初始化系统参数，提高性能需要
         return 1;
     }
 
@@ -270,7 +270,7 @@ main(int argc, char *const *argv)
      * ngx_crc32_table_init() requires ngx_cacheline_size set in ngx_os_init()
      */
 
-    if (ngx_crc32_table_init() != NGX_OK) {
+    if (ngx_crc32_table_init() != NGX_OK) {  // 初始化crc表
         return 1;
     }
 
@@ -278,13 +278,13 @@ main(int argc, char *const *argv)
      * ngx_slab_sizes_init() requires ngx_pagesize set in ngx_os_init()
      */
 
-    ngx_slab_sizes_init();
+    ngx_slab_sizes_init();  // 初始化slab相关的数据，还不知道有啥用
 
-    if (ngx_add_inherited_sockets(&init_cycle) != NGX_OK) {
+    if (ngx_add_inherited_sockets(&init_cycle) != NGX_OK) {  // 从原有nginx继承socket
         return 1;
     }
 
-    if (ngx_preinit_modules() != NGX_OK) {
+    if (ngx_preinit_modules() != NGX_OK) {  // 预加载nginx module，其实就是设置name，模块个数及最大模块个数而已
         return 1;
     }
 
@@ -457,7 +457,7 @@ ngx_add_inherited_sockets(ngx_cycle_t *cycle)
 
     inherited = (u_char *) getenv(NGINX_VAR);
 
-    if (inherited == NULL) {
+    if (inherited == NULL) { // 没有设置过nginx就直接退出
         return NGX_OK;
     }
 
@@ -465,7 +465,7 @@ ngx_add_inherited_sockets(ngx_cycle_t *cycle)
                   "using inherited sockets from \"%s\"", inherited);
 
     if (ngx_array_init(&cycle->listening, cycle->pool, 10,
-                       sizeof(ngx_listening_t))
+                       sizeof(ngx_listening_t))  // listening的数组长度为10，每个数据大小为ngx_listening_t
         != NGX_OK)
     {
         return NGX_ERROR;
@@ -491,7 +491,7 @@ ngx_add_inherited_sockets(ngx_cycle_t *cycle)
 
             ngx_memzero(ls, sizeof(ngx_listening_t));
 
-            ls->fd = (ngx_socket_t) s;
+            ls->fd = (ngx_socket_t) s; // 保存socket
         }
     }
 
@@ -503,7 +503,7 @@ ngx_add_inherited_sockets(ngx_cycle_t *cycle)
 
     ngx_inherited = 1;
 
-    return ngx_set_inherited_sockets(cycle);
+    return ngx_set_inherited_sockets(cycle);  // 根据fd，获取socket相关参数
 }
 
 

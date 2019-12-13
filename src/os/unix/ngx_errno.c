@@ -43,7 +43,7 @@ ngx_strerror(ngx_err_t err, u_char *errstr, size_t size)
 
 
 ngx_int_t
-ngx_strerror_init(void)
+ngx_strerror_init(void) // 通过strerror 获取到系统的所有errno对应的报错信息，保存到全局指针ngx_sys_errlist中，提升效率
 {
     char       *msg;
     u_char     *p;

@@ -54,7 +54,7 @@ ngx_memalign(size_t alignment, size_t size, ngx_log_t *log)
     void  *p;
     int    err;
 
-    err = posix_memalign(&p, alignment, size);
+    err = posix_memalign(&p, alignment, size);  // 申请size大小，对齐为alignment的内存, size 必须是alignment的整数倍，否则会出错
 
     if (err) {
         ngx_log_error(NGX_LOG_EMERG, log, err,

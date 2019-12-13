@@ -96,28 +96,28 @@ ngx_time_update(void)
     sec = tv.tv_sec;
     msec = tv.tv_usec / 1000;
 
-    ngx_current_msec = ngx_monotonic_time(sec, msec);
+    ngx_current_msec = ngx_monotonic_time(sec, msec);  // 获取开机启动的相对时间
 
     tp = &cached_time[slot];
 
-    if (tp->sec == sec) {
+    if (tp->sec == sec) {  // 还是当前秒，只更新ms位，slot不变化
         tp->msec = msec;
         ngx_unlock(&ngx_time_lock);
         return;
     }
 
-    if (slot == NGX_TIME_SLOTS - 1) {
+    if (slot == NGX_TIME_SLOTS - 1) {  // slot 循环遍历cached_time
         slot = 0;
     } else {
         slot++;
     }
 
-    tp = &cached_time[slot];
+    tp = &cached_time[slot];  // 取下一个slot
 
-    tp->sec = sec;
+    tp->sec = sec;  // 保存当前时间
     tp->msec = msec;
 
-    ngx_gmtime(sec, &gmt);
+    ngx_gmtime(sec, &gmt);  // 转换当前时间为gmt格式时间
 
 
     p0 = &cached_http_time[slot][0];
