@@ -14,7 +14,7 @@
 
 
 typedef struct {
-    void        *elts;   // 数组可用的下标
+    void        *elts;   // 数组
     ngx_uint_t   nelts;  // 已有元素个数
     size_t       size;   // 数组单个元素大小
     ngx_uint_t   nalloc;  // 数组元素个数

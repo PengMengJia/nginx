@@ -27,7 +27,7 @@ ngx_preinit_modules(void)
 {
     ngx_uint_t  i;
 
-    for (i = 0; ngx_modules[i]; i++) {
+    for (i = 0; ngx_modules[i]; i++) {  // ngx_modules 哪里设置的值
         ngx_modules[i]->index = i;
         ngx_modules[i]->name = ngx_module_names[i];
     }

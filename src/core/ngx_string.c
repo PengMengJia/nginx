@@ -1906,7 +1906,7 @@ ngx_str_rbtree_insert_value(ngx_rbtree_node_t *temp,
 
     for ( ;; ) {
 
-        n = (ngx_str_node_t *) node;
+        n = (ngx_str_node_t *) node;  // 这个地方可以放外面去，减少赋值操作
         t = (ngx_str_node_t *) temp;
 
         if (node->key != temp->key) {
@@ -1922,18 +1922,18 @@ ngx_str_rbtree_insert_value(ngx_rbtree_node_t *temp,
                  ? &temp->left : &temp->right;
         }
 
-        if (*p == sentinel) {
+        if (*p == sentinel) {  // 最后的nil节点了
             break;
         }
 
-        temp = *p;
+        temp = *p; // 记录插入位置的父节点
     }
 
     *p = node;
     node->parent = temp;
     node->left = sentinel;
     node->right = sentinel;
-    ngx_rbt_red(node);
+    ngx_rbt_red(node);   // 当前节点设置为红色，父节点可能也是红色，需要re-balance
 }
 
 

@@ -232,7 +232,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
                 ngx_destroy_pool(pool);
                 return NULL;
             }
-            cycle->conf_ctx[cycle->modules[i]->index] = rv;
+            cycle->conf_ctx[cycle->modules[i]->index] = rv;  // 存放各个module的配置信息,索引为module加载索引
         }
     }
 
@@ -259,8 +259,8 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     conf.cycle = cycle;
     conf.pool = pool;
     conf.log = log;
-    conf.module_type = NGX_CORE_MODULE;
-    conf.cmd_type = NGX_MAIN_CONF;
+    conf.module_type = NGX_CORE_MODULE;  // ?
+    conf.cmd_type = NGX_MAIN_CONF;   // ?
 
 #if 0
     log->log_level = NGX_LOG_DEBUG_ALL;

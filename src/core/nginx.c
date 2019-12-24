@@ -918,7 +918,7 @@ ngx_process_options(ngx_cycle_t *cycle)
         len = ngx_strlen(ngx_prefix);
         p = ngx_prefix;
 
-        if (len && !ngx_path_separator(p[len - 1])) {
+        if (len && !ngx_path_separator(p[len - 1])) {  // prefix 最后一个不是 '/', 则加上 '/'
             p = ngx_pnalloc(cycle->pool, len + 1);
             if (p == NULL) {
                 return NGX_ERROR;
@@ -942,7 +942,7 @@ ngx_process_options(ngx_cycle_t *cycle)
             return NGX_ERROR;
         }
 
-        if (ngx_getcwd(p, NGX_MAX_PATH) == 0) {
+        if (ngx_getcwd(p, NGX_MAX_PATH) == 0) {  // 没有设置nginx_prefix 则使用当前绝对路径
             ngx_log_stderr(ngx_errno, "[emerg]: " ngx_getcwd_n " failed");
             return NGX_ERROR;
         }

@@ -23,10 +23,10 @@ struct ngx_list_part_s {
 
 
 typedef struct {
-    ngx_list_part_t  *last;
-    ngx_list_part_t   part;
-    size_t            size;
-    ngx_uint_t        nalloc;
+    ngx_list_part_t  *last;  // 最后一组链表数据的指针
+    ngx_list_part_t   part; // 链表元素存放的位置
+    size_t            size;  // 单个元素的大小
+    ngx_uint_t        nalloc;  // 链表可存元素个数
     ngx_pool_t       *pool;
 } ngx_list_t;
 
@@ -34,14 +34,14 @@ typedef struct {
 ngx_list_t *ngx_list_create(ngx_pool_t *pool, ngx_uint_t n, size_t size);
 
 static ngx_inline ngx_int_t
-ngx_list_init(ngx_list_t *list, ngx_pool_t *pool, ngx_uint_t n, size_t size)
+ngx_list_init(ngx_list_t *list, ngx_pool_t *pool, ngx_uint_t n, size_t size)  // size 链表元素的空间大小，n为链表元素个数
 {
-    list->part.elts = ngx_palloc(pool, n * size);
+    list->part.elts = ngx_palloc(pool, n * size); // 链表元素存放的位置
     if (list->part.elts == NULL) {
         return NGX_ERROR;
     }
 
-    list->part.nelts = 0;
+    list->part.nelts = 0; // 已存元素个数
     list->part.next = NULL;
     list->last = &list->part;
     list->size = size;

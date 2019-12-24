@@ -47,7 +47,7 @@ ngx_rbtree_insert(ngx_rbtree_t *tree, ngx_rbtree_node_t *node)
 
     while (node != *root && ngx_rbt_is_red(node->parent)) {
 
-        if (node->parent == node->parent->parent->left) {
+        if (node->parent == node->parent->parent->left) { // 父节点是左孩子
             temp = node->parent->parent->right;
 
             if (ngx_rbt_is_red(temp)) {

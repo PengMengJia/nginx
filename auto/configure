@@ -7,10 +7,12 @@
 LC_ALL=C
 export LC_ALL
 
+# 设置configure的配置，初始化环境变量，设置编译文件依赖
 . auto/options
 . auto/init
 . auto/sources
 
+# 创建objs目录
 test -d $NGX_OBJS || mkdir -p $NGX_OBJS
 
 echo > $NGX_AUTO_HEADERS_H

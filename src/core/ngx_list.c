@@ -35,16 +35,16 @@ ngx_list_push(ngx_list_t *l)
 
     last = l->last;
 
-    if (last->nelts == l->nalloc) {
+    if (last->nelts == l->nalloc) { // 元素已经存满了
 
         /* the last part is full, allocate a new list part */
 
-        last = ngx_palloc(l->pool, sizeof(ngx_list_part_t));
+        last = ngx_palloc(l->pool, sizeof(ngx_list_part_t));  // 从新申请一个part
         if (last == NULL) {
             return NULL;
         }
 
-        last->elts = ngx_palloc(l->pool, l->nalloc * l->size);
+        last->elts = ngx_palloc(l->pool, l->nalloc * l->size); // 在申请一个内存空间存放链表
         if (last->elts == NULL) {
             return NULL;
         }
@@ -52,8 +52,8 @@ ngx_list_push(ngx_list_t *l)
         last->nelts = 0;
         last->next = NULL;
 
-        l->last->next = last;
-        l->last = last;
+        l->last->next = last;  
+        l->last = last; // 将last指向新的part
     }
 
     elt = (char *) last->elts + l->size * last->nelts;
