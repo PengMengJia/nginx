@@ -221,7 +221,7 @@ main(int argc, char *const *argv)
 
     /* TODO */ ngx_max_sockets = -1;
 
-    ngx_time_init();  // 更新当前时间到缓存
+    ngx_time_init();  // 更新当前时间到缓存, 缓存的内存循环利用
 
 #if (NGX_PCRE)
     ngx_regex_init();
@@ -230,7 +230,7 @@ main(int argc, char *const *argv)
     ngx_pid = ngx_getpid();
     ngx_parent = ngx_getppid();
 
-    log = ngx_log_init(ngx_prefix);  // 初始化日志文件，open 文件，
+    log = ngx_log_init(ngx_prefix);  // 初始化日志文件，打开error.log的文件描述符
     if (log == NULL) {
         return 1;
     }
@@ -258,7 +258,7 @@ main(int argc, char *const *argv)
         return 1;
     }
 
-    if (ngx_process_options(&init_cycle) != NGX_OK) { // 设置输入参数
+    if (ngx_process_options(&init_cycle) != NGX_OK) { // 设置输入参数,主要是路径参数格式化为程序能识别的
         return 1;
     }
 
@@ -280,7 +280,7 @@ main(int argc, char *const *argv)
 
     ngx_slab_sizes_init();  // 初始化slab相关的数据，还不知道有啥用
 
-    if (ngx_add_inherited_sockets(&init_cycle) != NGX_OK) {  // 从原有nginx继承socket
+    if (ngx_add_inherited_sockets(&init_cycle) != NGX_OK) {  // 从已在当前目录运行的nginx继承socket, 并设置socket参数到listen数组
         return 1;
     }
 
@@ -288,7 +288,7 @@ main(int argc, char *const *argv)
         return 1;
     }
 
-    cycle = ngx_init_cycle(&init_cycle);
+    cycle = ngx_init_cycle(&init_cycle);   // 所有启动逻辑准备的位置。包括启动失败回滚操作
     if (cycle == NULL) {
         if (ngx_test_config) {
             ngx_log_stderr(0, "configuration file %s test failed",
@@ -304,7 +304,7 @@ main(int argc, char *const *argv)
                            cycle->conf_file.data);
         }
 
-        if (ngx_dump_config) {
+        if (ngx_dump_config) { // dump 配置文件
             cd = cycle->config_dump.elts;
 
             for (i = 0; i < cycle->config_dump.nelts; i++) {
@@ -325,7 +325,7 @@ main(int argc, char *const *argv)
     }
 
     if (ngx_signal) {
-        return ngx_signal_process(cycle, ngx_signal);
+        return ngx_signal_process(cycle, ngx_signal);  // 发送信号
     }
 
     ngx_os_status(cycle->log);
@@ -340,12 +340,12 @@ main(int argc, char *const *argv)
 
 #if !(NGX_WIN32)
 
-    if (ngx_init_signals(cycle->log) != NGX_OK) {
+    if (ngx_init_signals(cycle->log) != NGX_OK) {  // 初始化信号,各个模块有各自的signal
         return 1;
     }
 
     if (!ngx_inherited && ccf->daemon) {
-        if (ngx_daemon(cycle->log) != NGX_OK) {
+        if (ngx_daemon(cycle->log) != NGX_OK) {  // daemon 操作
             return 1;
         }
 
@@ -375,10 +375,10 @@ main(int argc, char *const *argv)
 
     ngx_use_stderr = 0;
 
-    if (ngx_process == NGX_PROCESS_SINGLE) {
+    if (ngx_process == NGX_PROCESS_SINGLE) {  // 单进程模式
         ngx_single_process_cycle(cycle);
 
-    } else {
+    } else {  // master worker 模式
         ngx_master_process_cycle(cycle);
     }
 
@@ -471,7 +471,7 @@ ngx_add_inherited_sockets(ngx_cycle_t *cycle)
         return NGX_ERROR;
     }
 
-    for (p = inherited, v = p; *p; p++) {
+    for (p = inherited, v = p; *p; p++) {  // v 当前串的其实位置，p为移动指针
         if (*p == ':' || *p == ';') {
             s = ngx_atoi(v, p - v);
             if (s == NGX_ERROR) {
@@ -984,14 +984,14 @@ ngx_process_options(ngx_cycle_t *cycle)
          p > cycle->conf_file.data;
          p--)
     {
-        if (ngx_path_separator(*p)) {
+        if (ngx_path_separator(*p)) { // 设置conf文件的目录
             cycle->conf_prefix.len = p - cycle->conf_file.data + 1;
             cycle->conf_prefix.data = cycle->conf_file.data;
             break;
         }
     }
 
-    if (ngx_conf_params) {
+    if (ngx_conf_params) {  // 保存全局的配置参数，独立于配置文件之外的
         cycle->conf_param.len = ngx_strlen(ngx_conf_params);
         cycle->conf_param.data = ngx_conf_params;
     }

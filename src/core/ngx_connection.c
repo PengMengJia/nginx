@@ -152,7 +152,7 @@ ngx_set_inherited_sockets(ngx_cycle_t *cycle)
 #endif
 
     ls = cycle->listening.elts;
-    for (i = 0; i < cycle->listening.nelts; i++) {
+    for (i = 0; i < cycle->listening.nelts; i++) { // 遍历继承listen 的fd
 
         ls[i].sockaddr = ngx_palloc(cycle->pool, sizeof(ngx_sockaddr_t));
         if (ls[i].sockaddr == NULL) {
@@ -160,7 +160,7 @@ ngx_set_inherited_sockets(ngx_cycle_t *cycle)
         }
 
         ls[i].socklen = sizeof(ngx_sockaddr_t);
-        if (getsockname(ls[i].fd, ls[i].sockaddr, &ls[i].socklen) == -1) {
+        if (getsockname(ls[i].fd, ls[i].sockaddr, &ls[i].socklen) == -1) {   // 根据fd 获取listen的 sockaddr 信息
             ngx_log_error(NGX_LOG_CRIT, cycle->log, ngx_socket_errno,
                           "getsockname() of the inherited "
                           "socket #%d failed", ls[i].fd);
@@ -176,7 +176,7 @@ ngx_set_inherited_sockets(ngx_cycle_t *cycle)
 
 #if (NGX_HAVE_INET6)
         case AF_INET6:
-            ls[i].addr_text_max_len = NGX_INET6_ADDRSTRLEN;
+            ls[i].addr_text_max_len = NGX_INET6_ADDRSTRLEN;  // 设置地址串长度, 不带端口
             len = NGX_INET6_ADDRSTRLEN + sizeof("[]:65535") - 1;
             break;
 #endif
@@ -207,7 +207,7 @@ ngx_set_inherited_sockets(ngx_cycle_t *cycle)
         }
 
         len = ngx_sock_ntop(ls[i].sockaddr, ls[i].socklen,
-                            ls[i].addr_text.data, len, 1);
+                            ls[i].addr_text.data, len, 1);  // 获取监听的地址
         if (len == 0) {
             return NGX_ERROR;
         }
@@ -319,8 +319,11 @@ ngx_set_inherited_sockets(ngx_cycle_t *cycle)
 
         olen = sizeof(int);
 
+        // TCP_FASTOPEN ,提高三次握手效率，根据cookie减少握手次数
+        // client 首次连接发送syn 包并请求tcp_fastopen cookie， server收到syn包之后，返回syn+ack 并根据client的ip加密生成cookie一并返回给client，client存储tcp_fastopen cookie
+        // client 断连之后再次请求连接时，向用户发送syn包用携带tcp_fastopen cookie 以及请求数据 给server，server校验cookie，返回syn+ack包，同时cookie校验通过可以直接处理client请求，cookie没通过则正常三次握手
         if (getsockopt(ls[i].fd, IPPROTO_TCP, TCP_FASTOPEN,
-                       (void *) &ls[i].fastopen, &olen)
+                       (void *) &ls[i].fastopen, &olen)  
             == -1)
         {
             err = ngx_socket_errno;
@@ -770,7 +773,7 @@ ngx_configure_listening_sockets(ngx_cycle_t *cycle)
 #endif
 
             if (setsockopt(ls[i].fd, IPPROTO_TCP, TCP_KEEPIDLE,
-                           (const void *) &value, sizeof(int))
+                           (const void *) &value, sizeof(int))  // tcp空闲多长时间进行探测
                 == -1)
             {
                 ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_socket_errno,
@@ -787,7 +790,7 @@ ngx_configure_listening_sockets(ngx_cycle_t *cycle)
 #endif
 
             if (setsockopt(ls[i].fd, IPPROTO_TCP, TCP_KEEPINTVL,
-                           (const void *) &value, sizeof(int))
+                           (const void *) &value, sizeof(int))  // tcp 保活探测时间间隔
                 == -1)
             {
                 ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_socket_errno,
@@ -796,7 +799,7 @@ ngx_configure_listening_sockets(ngx_cycle_t *cycle)
             }
         }
 
-        if (ls[i].keepcnt) {
+        if (ls[i].keepcnt) {  // tcp 保活探测次数，成功一次不再继续探测
             if (setsockopt(ls[i].fd, IPPROTO_TCP, TCP_KEEPCNT,
                            (const void *) &ls[i].keepcnt, sizeof(int))
                 == -1)

@@ -24,7 +24,7 @@ ngx_get_full_name(ngx_pool_t *pool, ngx_str_t *prefix, ngx_str_t *name)
     u_char     *p, *n;
     ngx_int_t   rc;
 
-    rc = ngx_test_full_name(name);
+    rc = ngx_test_full_name(name);  // name 是否是绝对路径
 
     if (rc == NGX_OK) {
         return rc;
@@ -56,7 +56,7 @@ ngx_get_full_name(ngx_pool_t *pool, ngx_str_t *prefix, ngx_str_t *name)
 
 
 static ngx_int_t
-ngx_test_full_name(ngx_str_t *name)
+ngx_test_full_name(ngx_str_t *name)  // 是否是绝对路径检测
 {
 #if (NGX_WIN32)
     u_char  c0, c1;

@@ -201,7 +201,7 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
         flags = 0;
 
     } else {
-        timer = ngx_event_find_timer();
+        timer = ngx_event_find_timer();  // 找到定时任务与当前时间的差值
         flags = NGX_UPDATE_TIME;
 
 #if (NGX_WIN32)
@@ -549,7 +549,7 @@ ngx_event_module_init(ngx_cycle_t *cycle)
     ngx_str_set(&shm.name, "nginx_shared_zone");
     shm.log = cycle->log;
 
-    if (ngx_shm_alloc(&shm) != NGX_OK) {
+    if (ngx_shm_alloc(&shm) != NGX_OK) {  // 申请nginx的共享内存
         return NGX_ERROR;
     }
 

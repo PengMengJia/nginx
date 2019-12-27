@@ -44,7 +44,7 @@ ngx_event_find_timer(void)
 
     node = ngx_rbtree_min(root, sentinel);
 
-    timer = (ngx_msec_int_t) (node->key - ngx_current_msec);
+    timer = (ngx_msec_int_t) (node->key - ngx_current_msec);  // 最小定时任务的时间与当前时间比较
 
     return (ngx_msec_t) (timer > 0 ? timer : 0);
 }

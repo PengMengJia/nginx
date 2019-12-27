@@ -318,7 +318,7 @@ ngx_event_accept(ngx_event_t *ev)
 ngx_int_t
 ngx_trylock_accept_mutex(ngx_cycle_t *cycle)
 {
-    if (ngx_shmtx_trylock(&ngx_accept_mutex)) {
+    if (ngx_shmtx_trylock(&ngx_accept_mutex)) {  // 尝试获取共享内存区域的锁，
 
         ngx_log_debug0(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
                        "accept mutex locked");
@@ -327,7 +327,7 @@ ngx_trylock_accept_mutex(ngx_cycle_t *cycle)
             return NGX_OK;
         }
 
-        if (ngx_enable_accept_events(cycle) == NGX_ERROR) {
+        if (ngx_enable_accept_events(cycle) == NGX_ERROR) { // 将listen的socket全部加入到event，监听read事件
             ngx_shmtx_unlock(&ngx_accept_mutex);
             return NGX_ERROR;
         }

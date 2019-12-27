@@ -85,7 +85,7 @@ ngx_signal_t  signals[] = {
 
 ngx_pid_t
 ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
-    char *name, ngx_int_t respawn)
+    char *name, ngx_int_t respawn)  // 生产进程
 {
     u_long     on;
     ngx_pid_t  pid;
@@ -114,7 +114,7 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
 
         /* Solaris 9 still has no AF_LOCAL */
 
-        if (socketpair(AF_UNIX, SOCK_STREAM, 0, ngx_processes[s].channel) == -1)
+        if (socketpair(AF_UNIX, SOCK_STREAM, 0, ngx_processes[s].channel) == -1) // 建立全双工通信通道，用于父子通信
         {
             ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                           "socketpair() failed while spawning \"%s\"", name);
@@ -143,7 +143,7 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
         }
 
         on = 1;
-        if (ioctl(ngx_processes[s].channel[0], FIOASYNC, &on) == -1) {
+        if (ioctl(ngx_processes[s].channel[0], FIOASYNC, &on) == -1) {  // 匿名socket，接收SIGIO信号处理消息
             ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                           "ioctl(FIOASYNC) failed while spawning \"%s\"", name);
             ngx_close_channel(ngx_processes[s].channel, cycle->log);
@@ -157,7 +157,7 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
             return NGX_INVALID_PID;
         }
 
-        if (fcntl(ngx_processes[s].channel[0], F_SETFD, FD_CLOEXEC) == -1) {
+        if (fcntl(ngx_processes[s].channel[0], F_SETFD, FD_CLOEXEC) == -1) { // 避免子进程fork继续使用该channel
             ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                           "fcntl(FD_CLOEXEC) failed while spawning \"%s\"",
                            name);
@@ -165,7 +165,7 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
             return NGX_INVALID_PID;
         }
 
-        if (fcntl(ngx_processes[s].channel[1], F_SETFD, FD_CLOEXEC) == -1) {
+        if (fcntl(ngx_processes[s].channel[1], F_SETFD, FD_CLOEXEC) == -1) {  // 避免子进程fork继续使用该channel 
             ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                           "fcntl(FD_CLOEXEC) failed while spawning \"%s\"",
                            name);

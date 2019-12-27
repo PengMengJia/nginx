@@ -60,7 +60,7 @@ static ngx_uint_t argument_number[] = {
 
 
 char *
-ngx_conf_param(ngx_conf_t *cf)
+ngx_conf_param(ngx_conf_t *cf) // 解析nginx -g 参数
 {
     char             *rv;
     ngx_str_t        *param;
@@ -90,7 +90,7 @@ ngx_conf_param(ngx_conf_t *cf)
     cf->conf_file = &conf_file;
     cf->conf_file->buffer = &b;
 
-    rv = ngx_conf_parse(cf, NULL);
+    rv = ngx_conf_parse(cf, NULL);  // 解析配置信息，将配置设置到所属于的nginx模块，其中包含解析的内容，没细看
 
     cf->conf_file = NULL;
 
@@ -222,7 +222,7 @@ ngx_conf_parse(ngx_conf_t *cf, ngx_str_t *filename)
 #endif
            )
         {
-            if (ngx_conf_add_dump(cf, filename) != NGX_OK) {
+            if (ngx_conf_add_dump(cf, filename) != NGX_OK) {  // 将文件dump到红黑树里面
                 goto failed;
             }
 
@@ -884,7 +884,7 @@ ngx_conf_include(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
 
 ngx_int_t
-ngx_conf_full_name(ngx_cycle_t *cycle, ngx_str_t *name, ngx_uint_t conf_prefix)
+ngx_conf_full_name(ngx_cycle_t *cycle, ngx_str_t *name, ngx_uint_t conf_prefix)  // 获取name的绝对路径, conf_prefix 标明是用哪个prefix
 {
     ngx_str_t  *prefix;
 

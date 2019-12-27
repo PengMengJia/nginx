@@ -62,7 +62,7 @@ ngx_shmtx_destroy(ngx_shmtx_t *mtx)
 ngx_uint_t
 ngx_shmtx_trylock(ngx_shmtx_t *mtx)
 {
-    return (*mtx->lock == 0 && ngx_atomic_cmp_set(mtx->lock, 0, ngx_pid));
+    return (*mtx->lock == 0 && ngx_atomic_cmp_set(mtx->lock, 0, ngx_pid));  // lock为共享内存的区域
 }
 
 

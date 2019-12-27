@@ -97,7 +97,7 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
     sigaddset(&set, ngx_signal_value(NGX_SHUTDOWN_SIGNAL));
     sigaddset(&set, ngx_signal_value(NGX_CHANGEBIN_SIGNAL));
 
-    if (sigprocmask(SIG_BLOCK, &set, NULL) == -1) {
+    if (sigprocmask(SIG_BLOCK, &set, NULL) == -1) {  // 忽略上面这些信号
         ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                       "sigprocmask() failed");
     }
@@ -123,13 +123,13 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
         p = ngx_cpystrn(p, (u_char *) ngx_argv[i], size);
     }
 
-    ngx_setproctitle(title);
+    ngx_setproctitle(title);  // title = master_process + 启动入参
 
 
     ccf = (ngx_core_conf_t *) ngx_get_conf(cycle->conf_ctx, ngx_core_module);
 
     ngx_start_worker_processes(cycle, ccf->worker_processes,
-                               NGX_PROCESS_RESPAWN);
+                               NGX_PROCESS_RESPAWN);  // 启动worker进程
     ngx_start_cache_manager_processes(cycle, 0);
 
     ngx_new_binary = 0;
@@ -732,14 +732,14 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
     ngx_process = NGX_PROCESS_WORKER;
     ngx_worker = worker;
 
-    ngx_worker_process_init(cycle, worker);
+    ngx_worker_process_init(cycle, worker);  // 初始化worker参数，
 
     ngx_setproctitle("worker process");
 
-    for ( ;; ) {
+    for ( ;; ) { // worker循环运行
 
         if (ngx_exiting) {
-            if (ngx_event_no_timers_left() == NGX_OK) {
+            if (ngx_event_no_timers_left() == NGX_OK) {  // 处理完所有任务
                 ngx_log_error(NGX_LOG_NOTICE, cycle->log, 0, "exiting");
                 ngx_worker_process_exit(cycle);
             }
@@ -882,7 +882,7 @@ ngx_worker_process_init(ngx_cycle_t *cycle, ngx_int_t worker)
     if (worker >= 0) {
         cpu_affinity = ngx_get_cpu_affinity(worker);
 
-        if (cpu_affinity) {
+        if (cpu_affinity) {  // 设置cpu亲和性，根据worker的number指定
             ngx_setaffinity(cpu_affinity, cycle->log);
         }
     }

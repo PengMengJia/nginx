@@ -16,7 +16,7 @@ ngx_shm_alloc(ngx_shm_t *shm)
 {
     shm->addr = (u_char *) mmap(NULL, shm->size,
                                 PROT_READ|PROT_WRITE,
-                                MAP_ANON|MAP_SHARED, -1, 0);
+                                MAP_ANON|MAP_SHARED, -1, 0); // 匿名映射共享内存到当前内存，起始位置由程序决定
 
     if (shm->addr == MAP_FAILED) {
         ngx_log_error(NGX_LOG_ALERT, shm->log, ngx_errno,

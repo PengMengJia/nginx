@@ -66,7 +66,7 @@ ngx_os_init(ngx_log_t *log)
     }
 
 #if (NGX_HAVE_LEVEL1_DCACHE_LINESIZE)
-    size = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);  // 获取cpu缓存大小，后续将对齐策略改为此值的整数倍，有利于减少cpu内存读取操作
+    size = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);  // 获取cpu 1级缓存大小，后续将对齐策略改为此值的整数倍，有利于减少cpu内存读取操作
     if (size > 0) {
         ngx_cacheline_size = size;
     }

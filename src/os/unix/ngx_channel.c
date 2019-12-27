@@ -26,7 +26,7 @@ ngx_write_channel(ngx_socket_t s, ngx_channel_t *ch, size_t size,
         char            space[CMSG_SPACE(sizeof(int))];
     } cmsg;
 
-    if (ch->fd == -1) {
+    if (ch->fd == -1) {  // 父子进程的channel创建失败
         msg.msg_control = NULL;
         msg.msg_controllen = 0;
 

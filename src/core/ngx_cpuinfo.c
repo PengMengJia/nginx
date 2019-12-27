@@ -29,17 +29,17 @@ ngx_cpuid(uint32_t i, uint32_t *buf)
 
     __asm__ (
 
-    "    mov    %%ebx, %%esi;  "
+    "    mov    %%ebx, %%esi;  "   // 保存基地址寄存器的值
 
-    "    cpuid;                "
+    "    cpuid;                "   // cpuid汇编指令 获取cpu信息
     "    mov    %%eax, (%1);   "
     "    mov    %%ebx, 4(%1);  "
     "    mov    %%edx, 8(%1);  "
     "    mov    %%ecx, 12(%1); "
 
-    "    mov    %%esi, %%ebx;  "
+    "    mov    %%esi, %%ebx;  "  // 还原基址寄存器
 
-    : : "a" (i), "D" (buf) : "ecx", "edx", "esi", "memory" );
+    : : "a" (i), "D" (buf) : "ecx", "edx", "esi", "memory" );  // 输入参数i 跟buf， 按顺序在汇编就是%0，%1
 }
 
 

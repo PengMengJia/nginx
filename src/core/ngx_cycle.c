@@ -36,7 +36,7 @@ static ngx_connection_t  dumb;
 
 
 ngx_cycle_t *
-ngx_init_cycle(ngx_cycle_t *old_cycle)
+ngx_init_cycle(ngx_cycle_t *old_cycle)  // 有些参数启动的时候并没有加载，只是在执行nginx reload等命令调用的时候用到
 {
     void                *rv;
     char               **senv;
@@ -54,14 +54,14 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     ngx_core_module_t   *module;
     char                 hostname[NGX_MAXHOSTNAMELEN];
 
-    ngx_timezone_update();
+    ngx_timezone_update();  // 设置时区
 
     /* force localtime update with a new timezone */
 
     tp = ngx_timeofday();
     tp->sec = 0;
 
-    ngx_time_update();
+    ngx_time_update();  // 更新内存保存的时间
 
 
     log = old_cycle->log;
@@ -133,7 +133,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     }
 
     ngx_rbtree_init(&cycle->config_dump_rbtree, &cycle->config_dump_sentinel,
-                    ngx_str_rbtree_insert_value);
+                    ngx_str_rbtree_insert_value);  // 初始化红黑树
 
     if (old_cycle->open_files.part.nelts) {
         n = old_cycle->open_files.part.nelts;
@@ -193,7 +193,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     }
 
 
-    if (gethostname(hostname, NGX_MAXHOSTNAMELEN) == -1) {
+    if (gethostname(hostname, NGX_MAXHOSTNAMELEN) == -1) {  // 获取主机名称，及当前运行的用户名
         ngx_log_error(NGX_LOG_EMERG, log, ngx_errno, "gethostname() failed");
         ngx_destroy_pool(pool);
         return NULL;
@@ -213,14 +213,14 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     ngx_strlow(cycle->hostname.data, (u_char *) hostname, cycle->hostname.len);
 
 
-    if (ngx_cycle_modules(cycle) != NGX_OK) {
+    if (ngx_cycle_modules(cycle) != NGX_OK) {  // 将全局变量定义的module模块信息全都加载到cycle的modules对象里面
         ngx_destroy_pool(pool);
         return NULL;
     }
 
 
     for (i = 0; cycle->modules[i]; i++) {
-        if (cycle->modules[i]->type != NGX_CORE_MODULE) {
+        if (cycle->modules[i]->type != NGX_CORE_MODULE) { // 只有核心模块需要create_conf
             continue;
         }
 
@@ -266,13 +266,13 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     log->log_level = NGX_LOG_DEBUG_ALL;
 #endif
 
-    if (ngx_conf_param(&conf) != NGX_CONF_OK) {
+    if (ngx_conf_param(&conf) != NGX_CONF_OK) { // 解析-g 命令带的参数
         environ = senv;
         ngx_destroy_cycle_pools(&conf);
         return NULL;
     }
 
-    if (ngx_conf_parse(&conf, &cycle->conf_file) != NGX_CONF_OK) {
+    if (ngx_conf_parse(&conf, &cycle->conf_file) != NGX_CONF_OK) {  // 解析配置文件nginx.conf的内容
         environ = senv;
         ngx_destroy_cycle_pools(&conf);
         return NULL;
@@ -290,7 +290,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 
         module = cycle->modules[i]->ctx;
 
-        if (module->init_conf) {
+        if (module->init_conf) { // 初始化各个模块的配置信息
             if (module->init_conf(cycle,
                                   cycle->conf_ctx[cycle->modules[i]->index])
                 == NGX_CONF_ERROR)
@@ -342,7 +342,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
     }
 
 
-    if (ngx_create_paths(cycle, ccf->user) != NGX_OK) {
+    if (ngx_create_paths(cycle, ccf->user) != NGX_OK) {  // 创建nginx运行需要的文件目录
         goto failed;
     }
 
@@ -493,9 +493,9 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 
     /* handle the listening sockets */
 
-    if (old_cycle->listening.nelts) {
+    if (old_cycle->listening.nelts) {  // old_cycle, 主要存了当前运行路径下已经启动的nginx的listen信息
         ls = old_cycle->listening.elts;
-        for (i = 0; i < old_cycle->listening.nelts; i++) {
+        for (i = 0; i < old_cycle->listening.nelts; i++) {  // 之前运行的nginx继承过来的fd全都不保留
             ls[i].remain = 0;
         }
 
@@ -517,7 +517,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 
                 if (ngx_cmp_sockaddr(nls[n].sockaddr, nls[n].socklen,
                                      ls[i].sockaddr, ls[i].socklen, 1)
-                    == NGX_OK)
+                    == NGX_OK) //前后相同，nginx reload restart的时候调用走到这里
                 {
                     nls[n].fd = ls[i].fd;
                     nls[n].previous = &ls[i];
@@ -605,12 +605,12 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
         }
     }
 
-    if (ngx_open_listening_sockets(cycle) != NGX_OK) {
+    if (ngx_open_listening_sockets(cycle) != NGX_OK) {  // 执行socket的listen, bind操作
         goto failed;
     }
 
     if (!ngx_test_config) {
-        ngx_configure_listening_sockets(cycle);
+        ngx_configure_listening_sockets(cycle);  // 执行listen socket的setsockopt操作
     }
 
 
@@ -622,7 +622,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
 
     pool->log = cycle->log;
 
-    if (ngx_init_modules(cycle) != NGX_OK) {
+    if (ngx_init_modules(cycle) != NGX_OK) {  // 初始化nginx module
         /* fatal */
         exit(1);
     }
@@ -682,7 +682,7 @@ ngx_init_cycle(ngx_cycle_t *old_cycle)
             break;
         }
 
-        ngx_shm_free(&oshm_zone[i].shm);
+        ngx_shm_free(&oshm_zone[i].shm); // 新老共享内存相同，则释放老的共享内存
 
     live_shm_zone:
 
@@ -697,7 +697,7 @@ old_shm_zone_done:
     ls = old_cycle->listening.elts;
     for (i = 0; i < old_cycle->listening.nelts; i++) {
 
-        if (ls[i].remain || ls[i].fd == (ngx_socket_t) -1) {
+        if (ls[i].remain || ls[i].fd == (ngx_socket_t) -1) {  // old_cycle 的remain都在上面被设置为0
             continue;
         }
 

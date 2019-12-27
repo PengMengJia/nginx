@@ -18,10 +18,10 @@ typedef struct ngx_listening_s  ngx_listening_t;
 struct ngx_listening_s {
     ngx_socket_t        fd;
 
-    struct sockaddr    *sockaddr;
+    struct sockaddr    *sockaddr;   // 监听socket的sockaddr
     socklen_t           socklen;    /* size of sockaddr */
-    size_t              addr_text_max_len;
-    ngx_str_t           addr_text;
+    size_t              addr_text_max_len;  // 监听地址长度，不包括端口
+    ngx_str_t           addr_text;       // 监听地址，包括端口
 
     int                 type;
 
@@ -48,7 +48,7 @@ struct ngx_listening_s {
     /* should be here because of the deferred accept */
     ngx_msec_t          post_accept_timeout;
 
-    ngx_listening_t    *previous;
+    ngx_listening_t    *previous;  // 保存已经启动的nginx 的listen对象
     ngx_connection_t   *connection;
 
     ngx_rbtree_t        rbtree;
