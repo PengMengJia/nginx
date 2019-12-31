@@ -35,7 +35,7 @@ ngx_event_del_timer(ngx_event_t *ev)
                    "event timer del: %d: %M",
                     ngx_event_ident(ev->data), ev->timer.key);
 
-    ngx_rbtree_delete(&ngx_event_timer_rbtree, &ev->timer);
+    ngx_rbtree_delete(&ngx_event_timer_rbtree, &ev->timer);  // 将事件ev的定时任务删除掉
 
 #if (NGX_DEBUG)
     ev->timer.left = NULL;
@@ -53,9 +53,9 @@ ngx_event_add_timer(ngx_event_t *ev, ngx_msec_t timer)
     ngx_msec_t      key;
     ngx_msec_int_t  diff;
 
-    key = ngx_current_msec + timer;
+    key = ngx_current_msec + timer;  // 当前定时事件下一个促发的时间点
 
-    if (ev->timer_set) {
+    if (ev->timer_set) {  // 之前已经设置过一次了
 
         /*
          * Use a previous timer value if difference between it and a new
@@ -65,7 +65,7 @@ ngx_event_add_timer(ngx_event_t *ev, ngx_msec_t timer)
 
         diff = (ngx_msec_int_t) (key - ev->timer.key);
 
-        if (ngx_abs(diff) < NGX_TIMER_LAZY_DELAY) {
+        if (ngx_abs(diff) < NGX_TIMER_LAZY_DELAY) {  //  比上一次设置的定时任务的差值在300ms以内，则没必要更新定时器，直接使用原来的，减少红黑树操作
             ngx_log_debug3(NGX_LOG_DEBUG_EVENT, ev->log, 0,
                            "event timer: %d, old: %M, new: %M",
                             ngx_event_ident(ev->data), ev->timer.key, key);

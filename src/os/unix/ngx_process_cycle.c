@@ -130,14 +130,14 @@ ngx_master_process_cycle(ngx_cycle_t *cycle)
 
     ngx_start_worker_processes(cycle, ccf->worker_processes,
                                NGX_PROCESS_RESPAWN);  // 启动worker进程
-    ngx_start_cache_manager_processes(cycle, 0);
+    ngx_start_cache_manager_processes(cycle, 0); // 
 
     ngx_new_binary = 0;
     delay = 0;
     sigio = 0;
     live = 1;
 
-    for ( ;; ) {
+    for ( ;; ) {  // master 进程的循环
         if (delay) {
             if (ngx_sigalrm) {
                 sigio = 0;
@@ -430,11 +430,11 @@ ngx_pass_open_channel(ngx_cycle_t *cycle, ngx_channel_t *ch)
     ngx_int_t  i;
 
     for (i = 0; i < ngx_last_process; i++) {
-
+        // 将当前创建的进程信息发送给之前已经创建了的进程。 ？之前创建的进程信息怎么把信息返回给新创建的呢？通过接收消息回消息？
         if (i == ngx_process_slot
             || ngx_processes[i].pid == -1
             || ngx_processes[i].channel[0] == -1)
-        {
+        {  
             continue;
         }
 
@@ -747,14 +747,14 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
 
         ngx_log_debug0(NGX_LOG_DEBUG_EVENT, cycle->log, 0, "worker cycle");
 
-        ngx_process_events_and_timers(cycle);
+        ngx_process_events_and_timers(cycle);  // 处理epoll事件任务
 
-        if (ngx_terminate) {
+        if (ngx_terminate) {  // 退出信号处理
             ngx_log_error(NGX_LOG_NOTICE, cycle->log, 0, "exiting");
             ngx_worker_process_exit(cycle);
         }
 
-        if (ngx_quit) {
+        if (ngx_quit) {  // 退出处理
             ngx_quit = 0;
             ngx_log_error(NGX_LOG_NOTICE, cycle->log, 0,
                           "gracefully shutting down");
@@ -768,7 +768,7 @@ ngx_worker_process_cycle(ngx_cycle_t *cycle, void *data)
             }
         }
 
-        if (ngx_reopen) {
+        if (ngx_reopen) {   // 重新另起log
             ngx_reopen = 0;
             ngx_log_error(NGX_LOG_NOTICE, cycle->log, 0, "reopening logs");
             ngx_reopen_files(cycle, -1);
@@ -1137,7 +1137,7 @@ ngx_cache_manager_process_cycle(ngx_cycle_t *cycle, void *data)
      */
     ngx_process = NGX_PROCESS_HELPER;
 
-    ngx_close_listening_sockets(cycle);
+    ngx_close_listening_sockets(cycle);  // 关闭listen的socket
 
     /* Set a moderate number of connections for a helper process. */
     cycle->connection_n = 512;

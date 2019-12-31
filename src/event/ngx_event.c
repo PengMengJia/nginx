@@ -238,31 +238,31 @@ ngx_process_events_and_timers(ngx_cycle_t *cycle)
     }
 
     if (!ngx_queue_empty(&ngx_posted_next_events)) {
-        ngx_queue_add(&ngx_posted_events, &ngx_posted_next_events);
-        ngx_queue_init(&ngx_posted_next_events);
+        ngx_queue_add(&ngx_posted_events, &ngx_posted_next_events); // 将next_events加入到events里面，所有队列的头部都不使用
+        ngx_queue_init(&ngx_posted_next_events); // 链表置a空
         timer = 0;
     }
 
     delta = ngx_current_msec;
 
-    (void) ngx_process_events(cycle, timer, flags);
+    (void) ngx_process_events(cycle, timer, flags);  // 根据timer设置epoll_wait的等待时间
 
-    delta = ngx_current_msec - delta;
+    delta = ngx_current_msec - delta;  // 执行epoll_wait的时间
 
     ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
                    "timer delta: %M", delta);
 
-    ngx_event_process_posted(cycle, &ngx_posted_accept_events);
+    ngx_event_process_posted(cycle, &ngx_posted_accept_events);  // 处理所有的accept事件
 
-    if (ngx_accept_mutex_held) {
+    if (ngx_accept_mutex_held) {  // 释放accept锁
         ngx_shmtx_unlock(&ngx_accept_mutex);
     }
 
     if (delta) {
-        ngx_event_expire_timers();
+        ngx_event_expire_timers(); // 处理定时任务
     }
 
-    ngx_event_process_posted(cycle, &ngx_posted_events);
+    ngx_event_process_posted(cycle, &ngx_posted_events);  // 处理其它事件任务
 }
 
 

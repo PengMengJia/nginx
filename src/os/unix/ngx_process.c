@@ -95,13 +95,13 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
         s = respawn;
 
     } else {
-        for (s = 0; s < ngx_last_process; s++) {
+        for (s = 0; s < ngx_last_process; s++) {  // 从当前已生成的进程中取一个已经被删掉的，没找到就往后加
             if (ngx_processes[s].pid == -1) {
                 break;
             }
         }
 
-        if (s == NGX_MAX_PROCESSES) {
+        if (s == NGX_MAX_PROCESSES) {  // 生成的进程过多了，不运行再生成了
             ngx_log_error(NGX_LOG_ALERT, cycle->log, 0,
                           "no more than %d processes can be spawned",
                           NGX_MAX_PROCESSES);
@@ -180,7 +180,7 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
         ngx_processes[s].channel[1] = -1;
     }
 
-    ngx_process_slot = s;
+    ngx_process_slot = s; // 记录一下当前生产的进程的下标
 
 
     pid = fork();
@@ -250,7 +250,7 @@ ngx_spawn_process(ngx_cycle_t *cycle, ngx_spawn_proc_pt proc, void *data,
         break;
     }
 
-    if (s == ngx_last_process) {
+    if (s == ngx_last_process) { // 超过了最大已生成的进程id下标
         ngx_last_process++;
     }
 

@@ -29,8 +29,8 @@ ngx_event_process_posted(ngx_cycle_t *cycle, ngx_queue_t *posted)
         ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
                       "posted event %p", ev);
 
-        ngx_delete_posted_event(ev);
+        ngx_delete_posted_event(ev);  // 从队列删除事件，
 
-        ev->handler(ev);
+        ev->handler(ev);  // 处理当前事件
     }
 }

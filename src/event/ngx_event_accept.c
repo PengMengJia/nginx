@@ -333,7 +333,7 @@ ngx_trylock_accept_mutex(ngx_cycle_t *cycle)
         }
 
         ngx_accept_events = 0;
-        ngx_accept_mutex_held = 1;
+        ngx_accept_mutex_held = 1;  // 设置accept锁已被获取
 
         return NGX_OK;
     }
@@ -341,7 +341,7 @@ ngx_trylock_accept_mutex(ngx_cycle_t *cycle)
     ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
                    "accept mutex lock failed: %ui", ngx_accept_mutex_held);
 
-    if (ngx_accept_mutex_held) {
+    if (ngx_accept_mutex_held) {  // 下一个事件又来了，但是上一事件还没处理完，accept锁还没被释放
         if (ngx_disable_accept_events(cycle, 0) == NGX_ERROR) {
             return NGX_ERROR;
         }
@@ -369,7 +369,7 @@ ngx_enable_accept_events(ngx_cycle_t *cycle)
             continue;
         }
 
-        if (ngx_add_event(c->read, NGX_READ_EVENT, 0) == NGX_ERROR) {
+        if (ngx_add_event(c->read, NGX_READ_EVENT, 0) == NGX_ERROR) {  // 添加读事件到event队列   ngx_epoll_add_event 调用epoll_ctl 函数 ,针对read 成员的操作
             return NGX_ERROR;
         }
     }
@@ -407,7 +407,7 @@ ngx_disable_accept_events(ngx_cycle_t *cycle, ngx_uint_t all)
 
 #endif
 
-        if (ngx_del_event(c->read, NGX_READ_EVENT, NGX_DISABLE_EVENT)
+        if (ngx_del_event(c->read, NGX_READ_EVENT, NGX_DISABLE_EVENT)  // 针对write 成员的epoll操作
             == NGX_ERROR)
         {
             return NGX_ERROR;
